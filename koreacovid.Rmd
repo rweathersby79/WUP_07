@@ -24,12 +24,13 @@ state of a patient must be died or alive - we adjust that as well
   
 # Question 1 - Is dying independent of sex
 
-
-
+$H_0$:Covid 19 deaths in Korea, between Jan-May 2020 are unrelated to sex. 
+$H_A$:Covid 19 there is a relationship between Jan-May 2020 to sex. 
 
 Table of patients:
 ```{r}
-
+kRdata$Sex = as.factor(kRdata$Sex)
+kRdata$result = as.factor(kRdata$result)
 # cross tabulation, patient state by gender
 
 with(kRdata, table(Sex, result))
@@ -46,14 +47,37 @@ with(kRdata, table(Sex, result))
 
 
 
-  
+```{r}
+dd2 <- kRdata %>% group_by(result,Sex) %>% summarize(count=n()) %>% mutate(prcnt=count/sum(count))
+
+basicC <- ggplot(dd2,aes(x=result,y=count,fill=Sex))
+basicC + geom_bar(stat="identity",position="dodge")
+#Now for percentage plot
+
+basicCC <- ggplot(dd2,aes(x=result,y=prcnt*100,fill=Sex)) 
+basicCC + geom_bar(stat="identity", position = "dodge")
+```
+Gender plays not role in covid death results. According to there is not a major differences. 
+
 ## Numerical results
 
+```{r}
+table1 <- xtabs(~result + Sex, data=kRdata)
+rowPerc(table1)
+colPerc(table1)
+```
+According to the numerical results, men are dying more than women 2 times as much. 
 
 ## Inferential results 
 
 
-
+```{r}
+chisq.test(table1)
+chisqtestGC(table1)
+fisher.test(table1)
+```
+We reject the null hypotheses due to the p-value = 0.001 and futher the odds of the male dying is 2.3 to 1. 
 
 ## Conclusions
 
+In conclusion in Korea the probability of a male dying from covid 2.3 times greater than women is significant. 
